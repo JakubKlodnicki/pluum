@@ -1,58 +1,27 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button, TextInput, Image } from 'react-native';
-import React, { FC, ReactElement, useState } from "react";
+import 'react-native-url-polyfill/auto'
+import { useState, useEffect } from 'react'
+import { supabase } from './lib/supabase'
+import Auth from './components/Auth'
+import Account from './components/Account'
+import { View } from 'react-native'
+import { Session } from '@supabase/supabase-js'
 
 export default function App() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const {session, setSession} = useState<Session | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+    })
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+  }, [])
+
   return (
-    <><View style={styles.container}>
-      <Image style={styles.logo} source={require('./assets/icon.png')} />
-    </View><View style={styles.container2}>
-        <TextInput
-          style={styles.input}
-          value={username}
-          placeholder={"Username"}
-          onChangeText={(text) => setUsername(text)}
-          autoCapitalize={"none"} />
-        <TextInput
-          style={styles.input}
-          value={password}
-          placeholder={"Password"}
-          secureTextEntry
-          onChangeText={(text) => setPassword(text)} />
-        <Button style={styles.button} title={"Sign Up"} onPress={() => { } } />
-        <StatusBar style="auto" />
-      </View></>
-  );
+    <View>
+      {session && session.user ? <Account key={session.user.id} session={session} /> : <Auth />}
+    </View>
+  )
 }
-const styles = StyleSheet.create({
-  container2: {
-    flex: 1,
-    backgroundColor: '#3535ce',
-    alignItems: 'center',
-    // justifyContent: 'center',
-  },
-  container: {
-    backgroundColor: '#3535ce',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  input: {
-    height: 40,
-    width: 200,
-    marginBottom: 10,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-  },
-  input:placeholder {
-    alignItems: 'center',
-  }
-  logo: {
-    width: 300,
-    height: 300,
-  },
-  button: {
-    color: '#fff',
-  }
-});
