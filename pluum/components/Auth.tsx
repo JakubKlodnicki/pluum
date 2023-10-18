@@ -40,6 +40,7 @@ export default function Auth() {
           value={email}
           placeholder="email@address.com"
           autoCapitalize={'none'}
+          style={styles.input}
         />
       </View>
       <View style={styles.verticallySpaced}>
@@ -51,12 +52,13 @@ export default function Auth() {
           secureTextEntry={true}
           placeholder="Password"
           autoCapitalize={'none'}
+          style={styles.input}
         />
       </View>
-      <View style={[styles.verticallySpaced, styles.mt20]}>
+      <View style={[styles.verticallySpaced, styles.buttonContainer, styles.mt20]}>
         <Button title="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
       </View>
-      <View style={styles.verticallySpaced}>
+      <View style={[styles.verticallySpaced, styles.buttonContainer]}>
         <Button title="Sign up" disabled={loading} onPress={() => signUpWithEmail()} />
       </View>
     </View>
@@ -75,5 +77,38 @@ const styles = StyleSheet.create({
   },
   mt20: {
     marginTop: 20,
+  },
+  container2: {
+    flex: 1,
+    backgroundColor: '#3535ce',
+    alignItems: 'center',
+    // justifyContent: 'center',
+  },
+  container: {
+    backgroundColor: '#3535ce',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  input: {
+    height: 40,
+    width: 200,
+    marginBottom: 10,
+    backgroundColor: '#fff',
+    borderRadius: 5,
+  },
+  logo: {
+    width: 300,
+    height: 300,
+  },
+  buttonContainer: {
+    backgroundColor: 'blue',
+    width: 200,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
   },
 })
