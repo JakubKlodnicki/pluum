@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, StyleSheet, View } from 'react-native'
+import { Alert, StyleSheet, View, Image, Text, TouchableOpacity } from 'react-native'
 import { supabase } from '../lib/supabase'
 import { Button, Input } from 'react-native-elements'
 
@@ -32,10 +32,10 @@ export default function Auth() {
 
   return (
     <View style={styles.container}>
+      <Image style={styles.logo} source={require('../assets/icon.png')} />
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Input
           label="Email"
-          leftIcon={{ type: 'font-awesome', name: 'envelope' }}
           onChangeText={(text) => setEmail(text)}
           value={email}
           placeholder="email@address.com"
@@ -46,7 +46,6 @@ export default function Auth() {
       <View style={styles.verticallySpaced}>
         <Input
           label="Password"
-          leftIcon={{ type: 'font-awesome', name: 'lock' }}
           onChangeText={(text) => setPassword(text)}
           value={password}
           secureTextEntry={true}
@@ -55,20 +54,26 @@ export default function Auth() {
           style={styles.input}
         />
       </View>
-      <View style={[styles.verticallySpaced, styles.buttonContainer, styles.mt20]}>
-        <Button title="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
+      <View>
+        <TouchableOpacity style={styles.buttonContainer} onPress={signInWithEmail}>
+          <Text style={styles.buttonText} >Sign Up</Text>
+        </TouchableOpacity>
       </View>
-      <View style={[styles.verticallySpaced, styles.buttonContainer]}>
-        <Button title="Sign up" disabled={loading} onPress={() => signUpWithEmail()} />
+      <View>
+        <TouchableOpacity style={styles.buttonContainer} onPress={signUpWithEmail}>
+          <Text style={styles.buttonText} >Sign Up</Text>
+        </TouchableOpacity>
       </View>
+
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 40,
-    padding: 12,
+    backgroundColor: '#3535ce',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   verticallySpaced: {
     paddingTop: 4,
@@ -84,11 +89,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     // justifyContent: 'center',
   },
-  container: {
-    backgroundColor: '#3535ce',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   input: {
     height: 40,
     width: 200,
@@ -101,14 +101,14 @@ const styles = StyleSheet.create({
     height: 300,
   },
   buttonContainer: {
-    backgroundColor: 'blue',
+    backgroundColor: 'white',
     width: 200,
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
   },
   buttonText: {
-    color: 'white',
+    color: 'black',
     fontSize: 16,
   },
 })
