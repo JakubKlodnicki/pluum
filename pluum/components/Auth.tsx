@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, StyleSheet, View, Image, Text, TouchableOpacity } from 'react-native'
+import { Alert, StyleSheet, View, Image, Text, TouchableOpacity, TextInput } from 'react-native'
 import { supabase } from '../lib/supabase'
 import { Button, Input } from 'react-native-elements'
 
@@ -34,29 +34,27 @@ export default function Auth() {
     <View style={styles.container}>
       <Image style={styles.logo} source={require('../assets/icon.png')} />
       <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Input
-          label="Email"
-          onChangeText={(text) => setEmail(text)}
-          value={email}
-          placeholder="email@address.com"
-          autoCapitalize={'none'}
-          style={styles.input}
-        />
+      <TextInput
+        onChangeText={(text) => setEmail(text)}
+        value={email}
+        placeholder="email@address.com"
+        autoCapitalize="none"
+        style={styles.input}
+      />
       </View>
       <View style={styles.verticallySpaced}>
-        <Input
-          label="Password"
-          onChangeText={(text) => setPassword(text)}
-          value={password}
-          secureTextEntry={true}
-          placeholder="Password"
-          autoCapitalize={'none'}
-          style={styles.input}
-        />
+      <TextInput
+        onChangeText={(text) => setPassword(text)}
+        value={password}
+        secureTextEntry={true}
+        placeholder="Password"
+        autoCapitalize="none"
+        style={styles.input}
+      />
       </View>
       <View>
         <TouchableOpacity style={styles.buttonContainer} onPress={signInWithEmail}>
-          <Text style={styles.buttonText} >Sign Up</Text>
+          <Text style={styles.buttonText} >Sign In</Text>
         </TouchableOpacity>
       </View>
       <View>
@@ -87,14 +85,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#3535ce',
     alignItems: 'center',
-    // justifyContent: 'center',
   },
   input: {
     height: 40,
-    width: 200,
+    width: 250,
     marginBottom: 10,
     backgroundColor: '#fff',
     borderRadius: 5,
+    justifyContent: "center",
   },
   logo: {
     width: 300,
@@ -106,6 +104,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
+    marginTop: 10,
   },
   buttonText: {
     color: 'black',

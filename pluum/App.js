@@ -31,5 +31,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#3535ce',
     alignItems: 'center',
     justifyContent: 'center',
+    height: "100%",
   },
 });
