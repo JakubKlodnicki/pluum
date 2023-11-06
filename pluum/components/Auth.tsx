@@ -92,7 +92,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: '#fff',
     borderRadius: 5,
-    justifyContent: "center",
+    textAlign: "center",
+    marginLeft: "auto",
+    marginRight: "auto",
   },
   logo: {
     width: 300,
