@@ -21,7 +21,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      {session && session.user ? <Account key={session.user.id} session={session} /> : <Auth />}
+      {session && session.user ? <Account session={session} /> : <Auth />}
     </View>
   )
 }

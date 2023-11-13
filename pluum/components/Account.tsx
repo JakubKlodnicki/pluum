@@ -1,90 +1,89 @@
-import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
-import { StyleSheet, View, Alert } from 'react-native'
-import { Button, Input } from 'react-native-elements'
-import { Session } from '@supabase/supabase-js'
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import { StyleSheet, View, Alert, Button as RNButton, Text, TouchableOpacity, Image } from 'react-native';
+import { Session } from '@supabase/supabase-js';
 
-export default function Account({ session }: { session: Session }) {
-  const [loading, setLoading] = useState(true)
-  const [username, setUsername] = useState('')
-  const [website, setWebsite] = useState('')
-  const [avatarUrl, setAvatarUrl] = useState('')
+
+
+interface AccountSwitcherProps {
+  session: Session;
+}
+
+const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
+  const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState('');
+  const [website, setWebsite] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [showProfile, setShowProfile] = useState(true);
 
   useEffect(() => {
-    if (session) getProfile()
-  }, [session])
+    if (session) getProfile();
+  }, [session]);
 
   async function getProfile() {
     try {
-      setLoading(true)
-      if (!session?.user) throw new Error('No user on the session!')
+      setLoading(true);
+      if (!session?.user) throw new Error('No user on the session!');
 
       const { data, error, status } = await supabase
         .from('profiles')
         .select(`username, website, avatar_url`)
         .eq('id', session?.user.id)
-        .single()
+        .single();
+
       if (error && status !== 406) {
-        throw error
+        throw error;
       }
 
       if (data) {
-        setUsername(data.username)
-        setWebsite(data.website)
-        setAvatarUrl(data.avatar_url)
+        setUsername(data.username);
+        setWebsite(data.website);
+        setAvatarUrl(data.avatar_url);
       }
     } catch (error) {
       if (error instanceof Error) {
-        Alert.alert(error.message)
+        Alert.alert(error.message);
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
-  async function updateProfile({
-    username,
-    website,
-    avatar_url,
-  }: {
-    username: string
-    website: string
-    avatar_url: string
-  }) {
-    try {
-      setLoading(true)
-      if (!session?.user) throw new Error('No user on the session!')
+  const handleProfileButtonClick = () => {
+    setShowProfile(true);
+  };
 
-      const updates = {
-        id: session?.user.id,
-        username,
-        website,
-        avatar_url,
-        updated_at: new Date(),
-      }
-
-      const { error } = await supabase.from('profiles').upsert(updates)
-
-      if (error) {
-        throw error
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message)
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
+  const handleHomeButtonClick = () => {
+    setShowProfile(false);
+  };
 
   return (
     <View style={styles.container}>
-      <View style={styles.verticallySpaced}>
-        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
+      {showProfile ? (
+        <View>
+          <Text>MAIN PAGE</Text>
+        </View>
+      ) : (
+        <View>
+          <Text>This is your profile</Text>
+          <RNButton title="Sign Out" onPress={() => supabase.auth.signOut()} />
+        </View>
+      )}
+      <View>
+      <View>
+        <TouchableOpacity style={styles.buttonContainerIcon} onPress={handleProfileButtonClick}>
+          <Image source={require('../assets/home.png')} style={styles.logoImage} />
+        </TouchableOpacity>
+      </View>
+      <View>
+        <TouchableOpacity style={styles.buttonContainerIcon} onPress={handleHomeButtonClick}>
+          <Image source={require('../assets/profile.png')} style={styles.logoImage} />
+        </TouchableOpacity>
+      </View>
       </View>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -99,4 +98,30 @@ const styles = StyleSheet.create({
   mt20: {
     marginTop: 20,
   },
-})
+  buttonContainer: {
+    backgroundColor: 'white',
+    width: 200,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
+    top: 200,
+  },
+  buttonContainerIcon: {
+    width: 200,
+    padding: 10,
+    alignItems: 'center',
+    top: 200,
+  },
+  buttonText: {
+    color: 'black',
+    fontSize: 16,
+  },
+  logoImage: {
+    width: 50,
+    height: 50,
+    marginBottom: 5,
+  },
+});
+
+export default AccountSwitcher;
