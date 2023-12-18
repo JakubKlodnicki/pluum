@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { StyleSheet, View, Alert, Button as RNButton, Text, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, Alert, Button as RNButton, Text, TouchableOpacity, Image, TextInput } from 'react-native';
 import { Session } from '@supabase/supabase-js';
-
-
 
 interface AccountSwitcherProps {
   session: Session;
@@ -12,9 +10,9 @@ interface AccountSwitcherProps {
 const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState('');
-  const [website, setWebsite] = useState('');
+  const [description, setDescription] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
-  const [showProfile, setShowProfile] = useState(true);
+  const [showProfile, setShowProfile] = useState<number | null>(1);
 
   useEffect(() => {
     if (session) getProfile();
@@ -27,7 +25,7 @@ const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
 
       const { data, error, status } = await supabase
         .from('profiles')
-        .select(`username, website, avatar_url`)
+        .select(`username, description, avatar_url`)
         .eq('id', session?.user.id)
         .single();
 
@@ -36,9 +34,9 @@ const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
       }
 
       if (data) {
-        setUsername(data.username);
-        setWebsite(data.website);
-        setAvatarUrl(data.avatar_url);
+        setUsername(data.username || '');
+        setDescription(data.description || '');
+        setAvatarUrl(data.avatar_url || '');
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -50,36 +48,93 @@ const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
   }
 
   const handleProfileButtonClick = () => {
-    setShowProfile(true);
+    setShowProfile(1);
   };
 
   const handleHomeButtonClick = () => {
-    setShowProfile(false);
+    setShowProfile(2);
   };
 
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+      if (!session?.user) throw new Error('No user on the session!');
+
+      console.log(session.user.id);
+      console.log(username);
+      console.log(description);
+      
+      const { data, error } = await supabase
+        .from('posty')
+        .upsert([{ 
+          username,
+          description,
+        }]);
+    
+      if (error) {
+        console.error('Upsert error:', error); // Zaloguj błąd
+        throw error;
+      }
+    
+      console.log('Upserted data:', data);
+    
+      Alert.alert('Profile updated successfully!');
+      getProfile();
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleThirdButtonClick = () => {
+    setShowProfile(null); // Ustawienie stanu na null dla trzeciego widoku
+  };
+  
   return (
     <View style={styles.container}>
-      {showProfile ? (
+      {showProfile === 1 ? (
         <View>
-          <Text>MAIN PAGE</Text>
+          <Text>Main Page</Text>
+          {/* Tu znajduje się zawartość dla pierwszego widoku */}
         </View>
-      ) : (
+      ) : showProfile === 2 ? (
         <View>
           <Text>This is your profile</Text>
           <RNButton title="Sign Out" onPress={() => supabase.auth.signOut()} />
         </View>
+      ) : (
+        <View>
+          <TextInput
+            style={styles.input}
+            placeholder="Username"
+            value={username}
+            onChangeText={(text) => setUsername(text)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Description"
+            value={description}
+            onChangeText={(text) => setDescription(text)}
+          />
+          <TouchableOpacity style={styles.buttonContainer} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Add post</Text>
+          </TouchableOpacity>
+        </View>
       )}
-      <View>
       <View>
         <TouchableOpacity style={styles.buttonContainerIcon} onPress={handleProfileButtonClick}>
           <Image source={require('../assets/home.png')} style={styles.logoImage} />
         </TouchableOpacity>
-      </View>
-      <View>
         <TouchableOpacity style={styles.buttonContainerIcon} onPress={handleHomeButtonClick}>
           <Image source={require('../assets/profile.png')} style={styles.logoImage} />
         </TouchableOpacity>
-      </View>
+        <TouchableOpacity style={styles.buttonContainerIcon} onPress={handleThirdButtonClick}>
+          {/* Tutaj możesz dodać ikonę lub tekst dla trzeciego przycisku */}
+          <Text>Third</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -90,13 +145,12 @@ const styles = StyleSheet.create({
     marginTop: 40,
     padding: 12,
   },
-  verticallySpaced: {
-    paddingTop: 4,
-    paddingBottom: 4,
-    alignSelf: 'stretch',
-  },
-  mt20: {
-    marginTop: 20,
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 20,
+    paddingHorizontal: 10,
   },
   buttonContainer: {
     backgroundColor: 'white',
