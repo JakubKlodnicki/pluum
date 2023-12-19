@@ -127,10 +127,9 @@ async function fetchMainPageData() {
     console.error('Error fetching main page data:', error);
   }
 }
-
-  
-  return (
-    <View style={styles.container}>
+return (
+  <View style={styles.container}>
+    <ScrollView style={styles.scrollContainer}>
       {showProfile === 1 ? (
         <View>
           <Text>{mainPageData2}{mainPageData}</Text>
@@ -160,26 +159,30 @@ async function fetchMainPageData() {
           </TouchableOpacity>
         </View>
       )}
-      <View>
-        <TouchableOpacity style={styles.buttonContainerIcon} onPress={handleProfileButtonClick}>
-          <Image source={require('../assets/home.png')} style={styles.logoImage} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonContainerIcon} onPress={handleHomeButtonClick}>
-          <Image source={require('../assets/profile.png')} style={styles.logoImage} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonContainerIcon} onPress={handleThirdButtonClick}>
-          {/* Tutaj możesz dodać ikonę lub tekst dla trzeciego przycisku */}
-          <Text>Third</Text>
-        </TouchableOpacity>
-      </View>
+    </ScrollView>
+    <View style={styles.bottomButtons}>
+      <TouchableOpacity style={styles.buttonContainerIcon} onPress={handleProfileButtonClick}>
+        <Image source={require('../assets/home.png')} style={styles.logoImage} />
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.buttonContainerIcon} onPress={handleHomeButtonClick}>
+        <Image source={require('../assets/profile.png')} style={styles.logoImage} />
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.buttonContainerIcon} onPress={handleThirdButtonClick}>
+        <Image source={require('../assets/add.png')} style={styles.logoImage} />
+      </TouchableOpacity>
     </View>
+  </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     marginTop: 40,
     padding: 12,
+  },
+  scrollContainer: {
+    flex: 1,
   },
   input: {
     height: 40,
@@ -195,23 +198,33 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
     marginTop: 10,
-    top: 200,
   },
   buttonContainerIcon: {
-    width: 200,
+    width: 50,
+    height: 50,
     padding: 10,
     alignItems: 'center',
-    top: 200,
+    justifyContent: 'center',
   },
   buttonText: {
     color: 'black',
     fontSize: 16,
   },
   logoImage: {
-    width: 50,
-    height: 50,
-    marginBottom: 5,
+    width: 30,
+    height: 30,
+  },
+  bottomButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '100%',
+    // backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingBottom: 20,
+    paddingTop: 10,
+    marginLeft: 40,
   },
 });
+
 
 export default AccountSwitcher;
