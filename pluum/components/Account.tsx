@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { StyleSheet, View, Alert, Button as RNButton, Text, TouchableOpacity, Image, TextInput } from 'react-native';
+import { StyleSheet, View, Alert, Button as RNButton, Text, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
 import { Session } from '@supabase/supabase-js';
 
 interface AccountSwitcherProps {
@@ -9,10 +9,13 @@ interface AccountSwitcherProps {
 
 const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
   const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState('');
+  const [usernamepost, setUsernamePost] = useState('');
+  const [username, setUsername] = useState(null);
   const [description, setDescription] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState(null);
   const [showProfile, setShowProfile] = useState<number | null>(1);
+  const [mainPageData, setMainPageData] = useState('');
+  const [mainPageData2, setMainPageData2] = useState('');
 
   useEffect(() => {
     if (session) getProfile();
@@ -34,7 +37,7 @@ const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
       }
 
       if (data) {
-        setUsername(data.username || '');
+        setUsernamePost(data.username || '');
         setDescription(data.description || '');
         setAvatarUrl(data.avatar_url || '');
       }
@@ -61,13 +64,13 @@ const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
       if (!session?.user) throw new Error('No user on the session!');
 
       console.log(session.user.id);
-      console.log(username);
+      console.log(usernamepost);
       console.log(description);
       
       const { data, error } = await supabase
         .from('posty')
         .upsert([{ 
-          username,
+          username: usernamepost,
           description,
         }]);
     
@@ -78,7 +81,7 @@ const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
     
       console.log('Upserted data:', data);
     
-      Alert.alert('Profile updated successfully!');
+      Alert.alert('Profile added successfully!');
       getProfile();
     } catch (error) {
       if (error instanceof Error) {
@@ -92,12 +95,45 @@ const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
   const handleThirdButtonClick = () => {
     setShowProfile(null); // Ustawienie stanu na null dla trzeciego widoku
   };
+
+
+useEffect(() => {
+  if (session) {
+    fetchMainPageData();
+  }
+}, [session]);
+
+async function fetchMainPageData() {
+  try {
+    const { data, error } = await supabase
+      .from('posty')
+      .select(`username, description`);
+
+    if (error) {
+      throw error;
+    }
+
+    if (data && data.length > 0) {
+      // Tworzymy parę użytkownik + opis i łączymy je z kilkoma nowymi liniami
+      const formattedData = data
+        .map(item => `${item.username}: ${item.description}`)
+        .join('\n\n'); // Dodajemy dwie nowe linie pomiędzy każdą parą użytkownik + opis
+
+      setMainPageData(formattedData);
+    } else {
+      setMainPageData('No usernames and descriptions found');
+    }
+  } catch (error) {
+    console.error('Error fetching main page data:', error);
+  }
+}
+
   
   return (
     <View style={styles.container}>
       {showProfile === 1 ? (
         <View>
-          <Text>Main Page</Text>
+          <Text>{mainPageData2}{mainPageData}</Text>
           {/* Tu znajduje się zawartość dla pierwszego widoku */}
         </View>
       ) : showProfile === 2 ? (
@@ -110,8 +146,8 @@ const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
           <TextInput
             style={styles.input}
             placeholder="Username"
-            value={username}
-            onChangeText={(text) => setUsername(text)}
+            value={usernamepost}
+            onChangeText={(text) => setUsernamePost(text)}
           />
           <TextInput
             style={styles.input}
