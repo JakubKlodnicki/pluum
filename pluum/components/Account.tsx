@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { StyleSheet, View, Alert, Button as RNButton, Text, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
+import { StyleSheet, View, Alert, Button as RNButton, Text, TouchableOpacity, Image, TextInput, ScrollView, Button } from 'react-native';
 import { Session } from '@supabase/supabase-js';
 
 interface AccountSwitcherProps {
@@ -9,10 +9,8 @@ interface AccountSwitcherProps {
 
 const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
   const [loading, setLoading] = useState(true);
-  const [usernamepost, setUsernamePost] = useState('');
-  const [username, setUsername] = useState(null);
+  const [username, setUsername] = useState('');
   const [description, setDescription] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState(null);
   const [showProfile, setShowProfile] = useState<number | null>(1);
   const [mainPageData, setMainPageData] = useState('');
   const [mainPageData2, setMainPageData2] = useState('');
@@ -28,7 +26,7 @@ const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
 
       const { data, error, status } = await supabase
         .from('profiles')
-        .select(`username, description, avatar_url`)
+        .select(`username`)
         .eq('id', session?.user.id)
         .single();
 
@@ -37,9 +35,7 @@ const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
       }
 
       if (data) {
-        setUsernamePost(data.username || '');
-        setDescription(data.description || '');
-        setAvatarUrl(data.avatar_url || '');
+        setUsername(data.username || '');
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -50,8 +46,41 @@ const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
     }
   }
 
+
+  
+  async function updateProfile({
+    username,
+  }: {
+    username: string
+  }) {
+    try {
+      setLoading(true)
+      if (!session?.user) throw new Error('No user on the session!')
+
+      const updates = {
+        id: session?.user.id,
+        username,
+        updated_at: new Date(),
+      }
+
+      const { error } = await supabase.from('profiles').upsert(updates)
+
+      if (error) {
+        throw error
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert(error.message)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+
   const handleProfileButtonClick = () => {
     setShowProfile(1);
+    fetchMainPageData();
   };
 
   const handleHomeButtonClick = () => {
@@ -64,13 +93,12 @@ const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ session }) => {
       if (!session?.user) throw new Error('No user on the session!');
 
       console.log(session.user.id);
-      console.log(usernamepost);
       console.log(description);
       
       const { data, error } = await supabase
         .from('posty')
         .upsert([{ 
-          username: usernamepost,
+          username: username,
           description,
         }]);
     
@@ -137,22 +165,25 @@ return (
         </View>
       ) : showProfile === 2 ? (
         <View>
-          <Text>This is your profile</Text>
+          <TextInput style={styles.input} value={session?.user?.email}/>
+          <TextInput style={styles.input} value={username || ''} onChangeText={(text) => setUsername(text)} />
+          <Button
+          title={loading ? 'Loading ...' : 'Update'}
+          onPress={() => updateProfile({ username })}
+          disabled={loading}
+        />
+
           <RNButton title="Sign Out" onPress={() => supabase.auth.signOut()} />
         </View>
       ) : (
-        <View>
+        <View style={styles.container}>
           <TextInput
-            style={styles.input}
-            placeholder="Username"
-            value={usernamepost}
-            onChangeText={(text) => setUsernamePost(text)}
-          />
-          <TextInput
-            style={styles.input}
+            style={styles.input2}
             placeholder="Description"
             value={description}
             onChangeText={(text) => setDescription(text)}
+            multiline={true}
+            numberOfLines={15}
           />
           <TouchableOpacity style={styles.buttonContainer} onPress={handleSubmit}>
             <Text style={styles.buttonText}>Add post</Text>
@@ -180,16 +211,30 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 40,
     padding: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   scrollContainer: {
     flex: 1,
   },
   input: {
     height: 40,
+    width: 200,
     borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  input2: {
+    height: 200,
+    width: 250,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 20,
+    paddingHorizontal: 3,
+    textAlignVertical: 'top',
   },
   buttonContainer: {
     backgroundColor: 'white',
